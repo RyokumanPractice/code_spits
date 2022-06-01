@@ -1,25 +1,17 @@
-const Item = class {
-    time;
-    block;
-    constructor(time, block) {
-        this.block = block;
-        this.time = time + performance.now(); // date.now 에 비하여 나노 초도 볼 수 있다.
-    }
+const working = () => {};
+for (let i; i < 10000; i++) working();
+
+const nbFor = (max, load, block) => {
+    let i = 0;
+    const f = (time) => {
+        let curr = load; // 사용값 주기
+        while (curr-- && i < max) {
+            // 사용값이 0이 되거나 i 가 최대횟수 달성
+            block();
+            i++;
+        }
+        console.log(i);
+        if (i < max - 1) requestAnimationFrame(f); // 루프 and i < max 로 해도 결과값은 같으나 1번 손해본다 (최대한 빨리 풀어주는게 맞다 왜냐면 동시성이거덩)
+    };
+    requestAnimationFrame(f); // 마지막 실행
 };
-
-const queue = new Set(); // set에는 중복된 객체 혹은 값을 넣을 수 없다.
-
-const f = (time) => {
-    queue.forEach((item) => {
-        if (item.time > time) return;
-        queue.delete(item);
-        item.block();
-    });
-    requestAnimationFrame(f); // f 를 무한 루프시키기 위해 존재
-};
-
-requestAnimationFrame(f); // f 를 실행시키기 위해 존재
-
-const timeout = (block, time) => queue.add(new Item(block, time));
-
-timeout(() => console.log("hello"), 1000);
